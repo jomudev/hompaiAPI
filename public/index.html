@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hompai API</title>
+</head>
+<body>
+  <header>
+    Wellcome to Hompai API REST
+  </header>
+  <main>
+    <p>Try</p>
+    <form action="javascript:sendData()" >
+      <fieldset>
+          <legend>
+            Create user
+          </legend>
+          <input type="text" name="email" placeholder="email" />
+          <input type="password" name="password" placeholder="password" />
+          <button type="submit">Sign In</button>
+        </fieldset>
+    </form>
+    <button onclick="javascript:getAllData()">Obtener usuarios</button>
+    <table id="users_table">
+      <thead>
+        <th>Id</th>
+        <th>Nombre</th>
+        <th>Correo</th>
+      </thead>
+      <tbody>
+
+      </tbody>
+    </table>
+  </main>
+</body>
+<script>
+  function sendData() {
+    const form = document.forms[0];
+    const email = form.email.value;
+    const password = form.password.value;
+    fetch("/auth/create_user", {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    }).then((res) => res.json()).then((res) => console.log(res));
+  }
+
+  function getAllData() {
+    const table = document.getElementById("users_table");
+    const tbody = table.children[1];
+    fetch("/auth/all_users")
+    .then((res) => res.json())
+    .then((users) => {
+      users.forEach((user) => {
+        const userTr = document.createElement("tr");
+        const userIdTd = document.createElement("td");
+        const userNameTd = document.createElement("td");
+        const userEmailTd = document.createElement("td");
+        userIdTd.innerText = user.id;
+        userNameTd.innerText = user.displayName;
+        userEmailTd.innerText = user.email;
+        userTr.appendChild(userIdTd);
+        userTr.appendChild(userNameTd);
+        userTr.appendChild(userEmailTd);
+        tbody.appendChild(userTr);
+      });
+    });
+  }
+</script>
+</html>
