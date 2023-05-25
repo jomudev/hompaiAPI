@@ -3,18 +3,19 @@ const API = require('../API');
 class UsersAPI extends API {
   constructor() {
     super();
-    super.tableName = "Users";
+    super.tablename = "Users";
   }
 
   async getAllUsers() {
-    return await this.getAllRecordsFrom(this.tableName);
+    return await this.getAllRecordsFrom();
   }
 
   userElementIsValid(user) {
-    const hasProp = (prop) => user.hasOwnProperty(prop);
-    return hasProp('id')
-    && hasProp('email')
-    && hasProp('authorization');
+    let validator = false;
+    validator = this.hasProp(user, 'id');
+    validator = validator && this.hasProp(user, 'email');
+    validator = validator && user.email.match(/^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/gm);
+    return validator;
   }
 
   async saveUser(user) {
@@ -23,7 +24,7 @@ class UsersAPI extends API {
       true: async () => {
         const keys = Object.keys(user);
         const values = Object.values(user);
-        await this.createRecord(this.tableName, keys, values);
+        await this.createRecord(keys, values);
       },
       false: async () => {}
     }

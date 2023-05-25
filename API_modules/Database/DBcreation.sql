@@ -4,7 +4,8 @@ CREATE TABLE Users (
 	id VARCHAR(255) NOT NULL PRIMARY KEY UNIQUE,
     displayName VARCHAR(50),
     email VARCHAR(50) NOT NULL,
-    authorization TEXT NOT NULL
+    photoURL TEXT,
+    phoneNumber INT
 );
 
 CREATE TABLE Measures (

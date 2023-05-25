@@ -7,13 +7,6 @@ admin.init().then(() => console.log("db connected in auth route"));
 router.post('/create_user', async (req, res) => {
   const body = req.body;
   try {
-    
-    await admin.userAdmin.saveUser({
-      id: "asdfñlkjasdfñlkj",
-      email: body.email,
-      authorization: body.password,
-    });
-
     console.log("body: ", body);
 
     res.send({
