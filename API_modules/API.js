@@ -1,14 +1,12 @@
 class API {
-  constructor() {
+  constructor(tablename) {
     this.db;
-    this.tablename;
+    this.tablename = tablename;
   }
 
-  async getAllRecordsFrom() {
-    if (this.tablename.includes(" ")) {
-      return;
-    }
-    return await this.db.selectAllFrom();
+  async getAllRecords() {
+    console.log("providing all records from " + this.tablename);
+    return await this.db.selectAllFrom(this.tablename);
   }
 
   hasProp(element, prop) {
@@ -16,9 +14,6 @@ class API {
   }
 
   async createRecord(keys, values) {
-    if (this.tablename.includes(" ")) {
-      return;
-    }
     if (typeof keys !== "object" || typeof values !== "object") {
       return;
     }
@@ -26,15 +21,15 @@ class API {
   }
 
   async deleteRecord(recordId) {
-    await this.db.deleteFrom(`DELETE FROM ${this.tablename} WHERE id=${recordId}`);
+    await this.db.deleteFrom(this.tablename, `WHERE id=${recordId}`);
   }
 
   async modifyRecord() {
 
   }
 
-  async findRecord() {
-
+  async findRecord(field, value) {
+    return await this.db.findByField(this.tablename, field, value);
   }
 
 }

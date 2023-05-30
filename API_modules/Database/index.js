@@ -2,14 +2,7 @@ const mysql = require('mysql');
 const dotenv = require('dotenv');
 dotenv.config();
 const env = process.env;
-const config = {
-  host: env.SQL_HOST,
-  database: env.SQL_DATABASE,
-  user: env.SQL_USER,
-  password: env.SQL_PASSWORD,
-  port: env.SQL_PORT
-}
-
+const config = JSON.parse(env.SQL_CONFIG);
 class DatabaseAPI {
   constructor() {
     this.connection = mysql.createConnection(config);
@@ -68,8 +61,8 @@ class DatabaseAPI {
     await this.query(`INSERT INTO ${tableName} (${fields}) VALUES (${values}) ${joinedQuery || ''}`);
   }
 
-  async getColumnsFrom(tableName) {
-    return await this.query(`SHOW COLUMNS FROM ${tableName}`);
+  async findByField(tablename, field, value) {
+    return await this.query(`SELECT * FROM ${tablename} WHERE ${field}=${value}`);
   }
 
 }
