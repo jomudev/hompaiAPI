@@ -5,20 +5,32 @@ const env = process.env;
 const config = JSON.parse(env.SQL_CONFIG);
 class DatabaseAPI {
   constructor() {
-    this.connection = mysql.createConnection(config);
+    this.connection = mysql.createPool(config);
+    this.conn();
+  }
+
+  static instance = null;
+
+  static getInstance() {
+    if (this.instance === null) {
+      this.instance = new DatabaseAPI();
+      delete this.constructor;
+    }
+    return this.instance;
   }
 
   async conn() {
-    const handleConnect = new Promise((resolve, reject) => {
-      this.connection.connect((err) => {
+    console.log("Connecting to database");
+    return new Promise((resolve, reject) => {
+      this.connection.getConnection((err) => {
         if (err) {
           reject(err);
           return;
         }
+        console.log("Connected successfully with id", this.connection._allConnections[0].threadId);
         resolve();
       });
     });
-    return handleConnect;
   }
 
   async end() {
@@ -37,7 +49,7 @@ class DatabaseAPI {
   async query (query) {
     console.log(query);
     const handleMakeQuery = new Promise((resolve, reject) => {
-      this.connection.query(query, (err, result, fields) => {
+      this.connection.query(query, (err, result) => {
         if (err) {
           reject(err);
           return;
@@ -49,10 +61,14 @@ class DatabaseAPI {
   }
 
   async selectAllFrom(tableName, joinedQuery) {
-    return await this.query(`SELECT * FROM ${tableName} ${joinedQuery || ''}`);
+    return await this.query(`SELECT * FROM ${tableName} ${joinedQuery}`);
   }
 
-  async selectFieldsFrom(fields, tableName, joinedQuery) {
+  async call(procedure, args) {
+    return await this.query(`CALL ${procedure}(${args})`);
+  }
+
+  async selectFieldsFrom(tableName, fields, joinedQuery) {
     return await this.query(`SELECT (${fields}) FROM ${tableName} ${joinedQuery || ''}`);
   }
 
@@ -63,6 +79,10 @@ class DatabaseAPI {
 
   async findByField(tablename, field, value) {
     return await this.query(`SELECT * FROM ${tablename} WHERE ${field}=${value}`);
+  }
+
+  async deleteFrom(tablename, condition) {
+    await this.query(`DELETE FROM ${tablename} ${condition ? condition : ''}`);
   }
 
 }

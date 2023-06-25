@@ -1,5 +1,5 @@
 const API = require('../API');
-
+const Database = require('../Database');
 class UsersAPI extends API {
   constructor() {
     super("Users");
@@ -11,10 +11,9 @@ class UsersAPI extends API {
 
   userElementIsValid(user) {
     let validator = false;
-    validator = this.hasProp(user, 'id');
-    validator = validator && this.hasProp(user, 'email');
+    validator = this.hasProp(user, 'id') && ((user.id !== null) || user.id !== undefined);
+    validator = validator && this.hasProp(user, 'email') && ((user.email !== null) || user.email !== undefined);
     validator = validator && (user.email.match(/^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/gm) !== null);
-    console.log("is user valid: " + validator);
     return validator;
   }
 
@@ -34,11 +33,16 @@ class UsersAPI extends API {
   async createUser(user) {
     console.log("creating user", user);
     const isUserElementValid = this.userElementIsValid(user);
-    if (isUserElementValid) {
-      const {keys, values} = this.depurate(user);
-      await this.createRecord(keys, values);
-    } else {
-      throw new Error("El formato del usuario no es válido.");
+    try {
+      if (isUserElementValid) {
+        const {keys, values} = this.depurate(user);
+        await this.createRecord(keys, values);
+      } else {
+        throw new Error("El formato del usuario no es válido.");
+      }
+    } catch (err) {
+      console.log(err);
+      return err;
     }
   }
 
@@ -48,6 +52,10 @@ class UsersAPI extends API {
 
   async getUserById(id) {
     return await this.db.findByField(this.tablename, "id", id);
+  }
+
+  async deleteUser(uid) {
+    await this.deleteRecord(uid);
   }
   
 };

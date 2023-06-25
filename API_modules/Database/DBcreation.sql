@@ -1,5 +1,19 @@
+DELIMITER //
+CREATE PROCEDURE `getPantryStock`(IN pantryId INT)
+BEGIN
+	SELECT * FROM 
+END //
+DELIMITER ;
+
 CREATE DATABASE Hompai;
 USE Hompai;
+select * FROM Articles;
+select * from Batches;
+select * from Pantries;
+select * from BatchesArticles;
+select * from Stock;
+DELETE FROM Articles WHERE id != 1 OR id != 2;
+
 CREATE TABLE Users (
 	id VARCHAR(255) NOT NULL PRIMARY KEY UNIQUE,
     displayName VARCHAR(50),
@@ -7,6 +21,9 @@ CREATE TABLE Users (
     photoURL TEXT,
     phoneNumber INT
 );
+
+SELECT * FROM Users;
+TRUNCATE TABLE Users;
 
 CREATE TABLE Measures (
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -25,6 +42,7 @@ CREATE TABLE Articles (
     idUsers VARCHAR(255) NOT NULL REFERENCES Users(id),
     name VARCHAR(50) NOT NULL,
     description VARCHAR(255),
+    photoURL TEXT,
     initialPrice DECIMAL(10, 2),
     idMeasures INT REFERENCES Measures(id),
     idUbications INT REFERENCES Ubications(id)
@@ -50,7 +68,9 @@ CREATE TABLE Batches (
 CREATE TABLE BatchesArticles (
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     idArticles INT NOT NULL REFERENCES Articles(id),
+    idStock INT NULL REFERENCES Stock(id),
     idBatches INT NOT NULL REFERENCES Batches(id),
+    expirationDate DATE DEFAULT NULL,
     quantity INT,
     price DECIMAL(10,2)
 );

@@ -1,0 +1,50 @@
+html
+  head
+    title= users
+    - function confirmPassword() {
+    -   console.log(document);
+    - }
+  body
+    h1= "Crear Usuario"
+    form(action="/auth/create_user" method="POST")
+      label= "Nombre de usuario"
+      input(type="username" placeholder="John Doe" name="displayName")
+      label= "Correo"
+      input(type="email" placeholder="johndoe@gmail.com" name="email")
+      label= "Contraseña"
+      input(type="password" placeholder="contraseña" name="password" id="password")
+      label= "confirmar contraseña"
+      input(type="password" onChange=confirmPassword() placeholder="contraseña" name="confirmPassword" id="confirmPassword")
+      div(id="alert")
+      input(type="submit" value="Crear")
+    h1= "Firebase users"
+    table
+      thead
+        th= "N°"
+        th= "nombre"
+        th= "id"
+        th= "correo"
+        th= "fecha de creación"
+      tbody
+        each val, index in fbUsers
+          tr
+            td= index
+            td= val.displayName
+            td= val.uid
+            td= val.email
+            td= val.metadata.creationTime
+
+    h1= "SQL Users"
+    table
+      thead
+        th= "N°"
+        th= "nombre"
+        th= "id"
+        th= "correo"
+      tbody
+        each val, index in sqlUsers 
+          tr
+            td= index
+            td= val.displayName
+            td= val.id
+            td= val.email

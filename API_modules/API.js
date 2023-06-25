@@ -1,7 +1,13 @@
+const Database = require("./Database");
 class API {
-  constructor(tablename) {
-    this.db;
+  constructor(uid, tablename) {
+    this.uid = uid;
+    this.db = Database.getInstance();
     this.tablename = tablename;
+  }
+
+  getValues(element) {
+    return `${Object.values(element).map(value => typeof value === 'string' ? `'${value}'` : value === 0 ? 0 : !value ? 'NULL' : value)}`;
   }
 
   async getAllRecords() {
@@ -17,15 +23,15 @@ class API {
     if (typeof keys !== "object" || typeof values !== "object") {
       return;
     }
-    await this.db.insertInto(this.tablename ,keys, values);
+    await this.db.insertInto(this.tablename ,keys, values, `WHERE idUsers=${this.uid}`);
   }
 
   async deleteRecord(recordId) {
-    await this.db.deleteFrom(this.tablename, `WHERE id=${recordId}`);
+    await this.db.deleteFrom(this.tablename, `WHERE id="${recordId}"`);
   }
 
-  async modifyRecord() {
-
+  async modifyRecord(recordId, field, value) {
+    await this.db.update(this.tablename, field, value, `WHERE id="${recordId}"`);
   }
 
   async findRecord(field, value) {
