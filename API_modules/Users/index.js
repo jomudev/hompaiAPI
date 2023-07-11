@@ -30,7 +30,11 @@ class UsersAPI extends API {
     return { keys, values };
   }
 
-  async createUser(user) {
+  async createUserMessagingToken(userId, messagingToken) {
+    await this.db.query(`INSERT INTO MessagingTokens(idUsers, token) VALUES(${userId}, ${messagingToken})`);
+  }
+
+  async createUser(user, messagingToken) {
     console.log("creating user", user);
     const isUserElementValid = this.userElementIsValid(user);
     try {
@@ -44,6 +48,7 @@ class UsersAPI extends API {
       console.log(err);
       return err;
     }
+    this.createUserMessagingToken(user.uid, messagingToken);
   }
 
   async getUserByEmail(email) {

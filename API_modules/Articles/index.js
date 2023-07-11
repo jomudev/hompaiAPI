@@ -15,9 +15,7 @@ class ArticlesAPI extends API {
       };
       const values = this.getValues(articleValues);
       let { articleId } = (await this.db.call("addArticle", values))[0];
-      console.log(`saved product ${articleValues.name} with returned id = "${JSON.stringify(articleId)}"`);
-      article.id = id;
-      console.log("article to saved in batch", article);
+      article.id = articleId;
       return article
     }));
   }
@@ -44,6 +42,7 @@ class ArticlesAPI extends API {
   async deleteBatch(batchId) {
     await this.db.query(`DELETE FROM Batches WHERE id=${batchId}`);
     this.db.query(`DELETE FROM BatchesArticles WHERE idBatches=${batchId}`);
+    this.notify();
   }
 
   async getPantries() {
@@ -55,6 +54,7 @@ class ArticlesAPI extends API {
       return;
     }
     await this.db.query(`CALL createPantry("${pantryName}", "${this.uid}")`);
+    this.notify();
   }
 
   async getArticles() {
@@ -72,6 +72,7 @@ class ArticlesAPI extends API {
       return;
     }
     await this.db.query(`DELETE FROM Articles WHERE id='${id}'`)
+    this.notify();
   }
 
   async addBatch(batch) {
@@ -86,29 +87,45 @@ class ArticlesAPI extends API {
   async getPantries() {
     let pantries = await this.db.selectAllFrom("Pantries", `WHERE idUsers='${this.uid}'`);
     pantries = pantries?.length ? pantries : [pantries];
-    delete pantries.idUsers;
+    pantries = pantries.map((pantry => ({ id: pantry.id, name: pantry.name })))
     return pantries;
+  }
+
+  async getExpirationDates() {
+    return await this.db.query(`SELECT Articles.name as name, Pantries.name as pantryName, Batches.date as batchDate, BatchesArticles.expirationDate as expirationDate, BatchesArticles.id as batchArticleId, Articles.idUsers as userId FROM BatchesArticles LEFT JOIN Articles ON Articles.id = BatchesArticles.idArticles LEFT JOIN Batches on Batches.id = BatchesArticles.idBatches LEFT JOIN Pantries ON Pantries.id = Batches.idPantries WHERE Articles.idUsers="${this.uid}"`);
+  }
+
+  async setExpiredArticle(articleId) {
+    const articleData = await this.db.call("setExpiredArticle", articleId)
+    if (articleData[0][0].hasOwnProperty("NULL")) {
+      return false;
+    }
+    return articleData[0][0];
   }
 
   async saveBatchArticles(batch) {
     if (!batch || !batch.id) {
       return;
     }
-    await this.db.query(`INSERT INTO BatchesArticles(idArticles, idBatches, quantity, price, idStock) VALUES ${batch.articles.map(batchArticle => {
-      return `(${batchArticle.id}, ${batch.id}, ${batchArticle.quantity}, ${batchArticle.price}, (SELECT id FROM Stock WHERE idPantries=${batch.idPantries}))`;
+    await this.db.query(`INSERT INTO BatchesArticles(idArticles, idBatches, expirationDate, quantity, price, idStock) VALUES ${batch.articles.map(batchArticle => {
+      const articleExpirationDate = batchArticle?.expirationDate && new Date(batchArticle.expirationDate).toISOString().slice(0, 19).replace('T', ' ');
+      return `(${batchArticle.id}, ${batch.id}, ${articleExpirationDate ? `"${articleExpirationDate}"` : 'null'}, ${batchArticle.quantity}, ${batchArticle.price}, (SELECT id FROM Stock WHERE idPantries=${batch.pantryId}))`;
     })}`);
   }
 
   async createBatch(batch) {
-    if (!batch || !batch.id) {
+    if (!batch || !batch?.pantryId) {
       return;
     }
+    console.log("inserting batch", batch);
     batch = {
       id: await this.addBatch(batch),
-      articles: await this.addArticles(batch.articles, batchPantry),
+      articles: await this.addArticles(batch.articles),
       ...batch,
     };
+    console.log("saved Batch", batch);
     this.saveBatchArticles(batch).then(() => console.log(`articles batch with id ${batch.id} were saved`));
+    this.notify();
     return batch.id; 
   }
 }

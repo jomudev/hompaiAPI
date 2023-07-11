@@ -1,7 +1,7 @@
 DELIMITER //
-CREATE PROCEDURE `getPantryStock`(IN pantryId INT)
-BEGIN
-	SELECT * FROM 
+CREATE PROCEDURE `getAllBatchesArticles`(IN batchArticleId INT)
+BEGIN	
+    SELECT BatchesArticles.expirationDate, Batches.date as batchDate, Articles.name FROM BatchesArticles LEFT JOIN Batches ON Batches.id = BatchesArticles.idBatches LEFT JOIN Articles ON Articles.id = BatchesArticles.idArticles WHERE BatchesArticles.expirationDate IS NOT NULL;
 END //
 DELIMITER ;
 
@@ -10,7 +10,9 @@ USE Hompai;
 select * FROM Articles;
 select * from Batches;
 select * from Pantries;
+select * from Users;
 select * from BatchesArticles;
+select * from ExpiredArticles;
 select * from Stock;
 DELETE FROM Articles WHERE id != 1 OR id != 2;
 
@@ -31,10 +33,24 @@ CREATE TABLE Measures (
     acronym VARCHAR(59)
 );
 
+CREATE TABLE Notifications (
+	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    idUsers VARCHAR(255) NOT NULL REFERENCES Users(id),
+	fireDate DATE NOT NULL,
+    title VARCHAR(64) NOT NULL,
+	body VARCHAR(255) NOT NULL,
+    imageURL TEXT NULL
+);
+
 CREATE TABLE Ubications (
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     idUsers VARCHAR(255) NOT NULL REFERENCES Users(id),
     name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE UsersTokens (
+idUsers VARCHAR(255) NOT NULL REFERENCES Users(id),
+token VARCHAR(355) NOT NULL UNIQUE
 );
 
 CREATE TABLE Articles (

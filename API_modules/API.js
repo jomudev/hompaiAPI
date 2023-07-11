@@ -1,8 +1,11 @@
 const Database = require("./Database");
-class API {
+const Observable = require("./Observable");
+
+class API extends Observable {
   constructor(uid, tablename) {
-    this.uid = uid;
+    super();
     this.db = Database.getInstance();
+    this.uid = uid;
     this.tablename = tablename;
   }
 

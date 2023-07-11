@@ -1,6 +1,8 @@
 const { app } = require('./src/app.js');
 const Database = require('./API_modules/Database/index.js');
 Database.getInstance();
+//const ExpiredArticlesNotifier = require('./API_modules/Articles/ExpiredArticlesNotifier.js');
+//ExpiredArticlesNotifier.getInstance();
 const port = process.env.PORT || 5000;
 
 const fbAdmin = require('firebase-admin');

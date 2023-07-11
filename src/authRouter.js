@@ -8,23 +8,24 @@ const sessions = Sessions.getInstance();
 router.post('/create_user', async (req, res) => {
   const admin = sessions.getSession(req.headers.authorization);
   let userEmail = req.body.email;
-  console.log("request body: ", req.body);
   if (!userEmail) {
     res.status(400).send("Necesitas proporcionar los datos necesarios");
     return;
   }
   var user = null;
   try {
-    user = await auth().getUserByEmail(userEmail);
+    user = await auth().getUser(req.headers.authorization);
   } catch(err) {
     console.error(err.stack);
-    res.status(400).send("Hubo un problema al intentar obtener los datos usuario");
+    res.status(400).send({
+      data: null,
+      error: "Hubo un problema al intentar obtener los datos usuario"
+    });
     return;
   }
-  console.log("user to create", user);
-
+  const messagingToken = req.headers['messaging-token'];
   try {
-    await admin.users.createUser(user);
+    await admin.users.createUser(user, messagingToken);
     await admin.articles.createPantry("Despensa");
   } catch(err) {
     await auth().deleteUser(user.uid);

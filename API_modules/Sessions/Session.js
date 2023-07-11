@@ -1,9 +1,9 @@
 const Admin = require('../Main/Main');
-
 class Session {
-  constructor(userInfo) {
+  constructor(userInfo, ip, messagingToken) {
     this.user = userInfo;
-    this.admin = new Admin(this.user.uid);
+    this.ip = ip;
+    this.admin = new Admin(this.user.uid, messagingToken);
   }
 }
 

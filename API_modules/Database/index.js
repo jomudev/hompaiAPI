@@ -1,5 +1,7 @@
 const mysql = require('mysql');
 const dotenv = require('dotenv');
+const Observable = require('../Observable');
+
 dotenv.config();
 const env = process.env;
 const config = JSON.parse(env.SQL_CONFIG);
@@ -47,7 +49,6 @@ class DatabaseAPI {
   }
 
   async query (query) {
-    console.log(query);
     const handleMakeQuery = new Promise((resolve, reject) => {
       this.connection.query(query, (err, result) => {
         if (err) {
@@ -65,7 +66,8 @@ class DatabaseAPI {
   }
 
   async call(procedure, args) {
-    return await this.query(`CALL ${procedure}(${args})`);
+    const returnedData = await this.query(`CALL ${procedure}(${args || ''})`);
+    return returnedData[0];
   }
 
   async selectFieldsFrom(tableName, fields, joinedQuery) {
