@@ -1,3 +1,7 @@
+CREATE DATABASE Hompai;
+USE Hompai;
+
+
 DELIMITER //
 CREATE PROCEDURE `getAllBatchesArticles`()
 BEGIN	
@@ -83,17 +87,6 @@ BEGIN
         SELECT * FROM Articles WHERE id = @articleId;
 END //
 DELIMITER ;
-
-CREATE DATABASE Hompai;
-USE Hompai;
-select * FROM Articles;
-select * from Batches;
-select * from Pantries;
-select * from Users;
-select * from BatchesArticles;
-select * from ExpiredArticles;
-select * from Stock;
-DELETE FROM Articles WHERE id != 1 OR id != 2;
 
 CREATE TABLE Users (
 	id VARCHAR(255) NOT NULL PRIMARY KEY UNIQUE,
