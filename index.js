@@ -1,9 +1,10 @@
 const { app } = require('./src/app.js');
 const Database = require('./API_modules/Database/index.js');
+const dotenv = require('dotenv').config();
 Database.getInstance();
 //const ExpiredArticlesNotifier = require('./API_modules/Articles/ExpiredArticlesNotifier.js');
 //ExpiredArticlesNotifier.getInstance();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 800;
 
 const fbAdmin = require('firebase-admin');
 const fbApp = require('./firebase/app');

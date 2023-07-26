@@ -1,13 +1,8 @@
 const mysql = require('mysql');
-const dotenv = require('dotenv');
-const Observable = require('../Observable');
-
-dotenv.config();
-const env = process.env;
-const config = JSON.parse(env.SQL_CONFIG);
+const config = require('./sql.config.js');
 class DatabaseAPI {
   constructor() {
-    this.connection = mysql.createPool(config);
+    this.connection = mysql.createPool(config)
     this.conn();
   }
 
