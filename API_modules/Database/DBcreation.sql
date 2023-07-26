@@ -1,7 +1,86 @@
 DELIMITER //
-CREATE PROCEDURE `getAllBatchesArticles`(IN batchArticleId INT)
+CREATE PROCEDURE `getAllBatchesArticles`()
 BEGIN	
-    SELECT BatchesArticles.expirationDate, Batches.date as batchDate, Articles.name FROM BatchesArticles LEFT JOIN Batches ON Batches.id = BatchesArticles.idBatches LEFT JOIN Articles ON Articles.id = BatchesArticles.idArticles WHERE BatchesArticles.expirationDate IS NOT NULL;
+    SELECT 
+		BatchesArticles.expirationDate, 
+        BatchesArticles.id,
+        Batches.date as batchDate, 
+        Articles.name,
+        Articles.idUsers as userId
+	FROM BatchesArticles 
+	LEFT JOIN Batches ON Batches.id = BatchesArticles.idBatches 
+    LEFT JOIN Articles ON Articles.id = BatchesArticles.idArticles
+    WHERE BatchesArticles.expirationDate IS NOT NULL;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE  PROCEDURE `addArticle`(
+	IN articleName VARCHAR(50), 
+    IN articleUserId VARCHAR(255), 
+    IN articleDescription VARCHAR(255), 
+    IN articlePhotoURL VARCHAR(255), 
+    IN articleInitialPrice DECIMAL(10, 2))
+BEGIN
+	SET @existentArticleId = (SELECT id FROM Articles WHERE LOWER(name) = LOWER(articleName));
+	IF ISNULL(@existentArticleId) THEN
+		INSERT INTO Articles(name, idUsers, description, photoURL, initialPrice)
+			VALUES (articleName, articleUserId, articleDescription, articlePhotoURL, articleInitialPrice);
+			SELECT LAST_INSERT_ID() as articleId;
+	ELSE
+		SELECT @existentArticleId as articleId;
+	END IF;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE `createPantry`(IN pantryName VARCHAR(50), IN userId VARCHAR(255))
+BEGIN
+	INSERT INTO Pantries(name, idUsers) VALUES(pantryName, userId);
+    INSERT INTO Stock(idPantries) VALUES(LAST_INSERT_ID());
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE `getAllFrom`(IN tablename VARCHAR(50))
+BEGIN
+	SELECT * FROM tablename;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE `insertBatch`(IN pantryId INT)
+BEGIN
+	INSERT INTO Batches(idPantries) VALUES(pantryId);
+    SELECT LAST_INSERT_ID() as batchId;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE `setExpiredArticle`(IN batchArticleId INT)
+BEGIN
+	SET @existentExpiredArticle = (SELECT idBatchesArticles FROM ExpiredArticles WHERE idBatchesArticles=batchArticleId);
+    IF ISNULL(@existentExpiredArticle) THEN
+		INSERT INTO ExpiredArticles(idBatchesArticles, checked) VALUES (batchArticleId, 0);
+        SELECT NULL;
+	ELSE 
+		SELECT ExpiredArticles.idBatchesArticles, Articles.name, BatchesArticles.expirationDate, Batches.date as batchDate FROM ExpiredArticles LEFT JOIN BatchesArticles ON BatchesArticles.id = ExpiredArticles.idBatchesArticles LEFT JOIN Batches ON Batches.id = BatchesArticles.idBatches LEFT JOIN Articles ON Articles.id = BatchesArticles.idArticles WHERE idBatchesArticles=batchArticleId;
+	END IF;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE `verifyArticle`(
+	IN articleName VARCHAR(50), 
+    IN articleUserId VARCHAR(255), 
+    IN articleDescription VARCHAR(255), 
+    IN articlePhotoURL VARCHAR(255), 
+    IN articleInitialPrice DECIMAL(10, 2))
+BEGIN
+	INSERT INTO Articles(name, idUsers, description, photoURL, initialPrice)
+        VALUES (articleName, articleUserId, articleDescription, articlePhotoURL, articleInitialPrice);
+        SET @articleId = SCOPE_IDENTITY();
+        SELECT * FROM Articles WHERE id = @articleId;
 END //
 DELIMITER ;
 
