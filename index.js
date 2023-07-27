@@ -4,7 +4,7 @@ require('dotenv').config();
 Database.getInstance();
 //const ExpiredArticlesNotifier = require('./API_modules/Articles/ExpiredArticlesNotifier.js');
 //ExpiredArticlesNotifier.getInstance();
-const port = process.env.PORT || 800;
+const port = process.env.PORT || 8080;
 
 const fbAdmin = require('firebase-admin');
 const fbApp = require('./firebase/app');
