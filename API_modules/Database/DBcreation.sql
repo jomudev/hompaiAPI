@@ -88,6 +88,27 @@ BEGIN
 END //
 DELIMITER ;
 
+DELIMITER //
+CREATE FUNCTION `getBatchArticlesQuantity`(batchId INT) RETURNS int
+    DETERMINISTIC
+BEGIN
+	RETURN (SELECT COUNT(id) AS articlesQuantity FROM BatchesArticles WHERE idBatches=batchId);
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE FUNCTION `getBatchArticlesTotal`(batchId INT) RETURNS int
+    DETERMINISTIC
+BEGIN
+	SET @total = (SELECT CAST(SUM(price*quantity) AS DECIMAL(10,2)) AS total FROM BatchesArticles WHERE idBatches=batchId);
+    IF ISNULL(@total) THEN
+		RETURN 0;
+	ELSE 
+		RETURN @total;
+	END IF;
+END //
+DELIMITER ;
+
 CREATE TABLE Users (
 	id VARCHAR(255) NOT NULL PRIMARY KEY UNIQUE,
     displayName VARCHAR(50),
